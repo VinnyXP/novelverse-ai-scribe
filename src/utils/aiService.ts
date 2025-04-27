@@ -1,8 +1,8 @@
 
-import { AIModel, StoryCreationSettings, Story, Volume, Chapter, Tag } from '../types';
+import { AIModel, StoryCreationSettings, Story, Chapter } from '../types';
 
 // Replace this with your actual Python backend URL
-const API_BASE_URL = 'https://your-backend-url.com';
+const API_BASE_URL = 'https://your-python-backend-url.com';
 
 export const aiService = {
   generateStory: async (settings: StoryCreationSettings): Promise<Story> => {
