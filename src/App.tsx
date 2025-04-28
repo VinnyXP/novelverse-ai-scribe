@@ -12,6 +12,8 @@ import Browse from "./pages/Browse";
 import Read from "./pages/Read";
 import NotFound from "./pages/NotFound";
 import Auth from "./components/Auth";
+import Profile from "./pages/Profile";
+import StoryEditor from "./pages/StoryEditor";
 
 const queryClient = new QueryClient();
 
@@ -30,6 +32,22 @@ const App = () => (
               element={
                 <RequireAuth>
                   <Create />
+                </RequireAuth>
+              } 
+            />
+            <Route 
+              path="/profile" 
+              element={
+                <RequireAuth>
+                  <Profile />
+                </RequireAuth>
+              } 
+            />
+            <Route 
+              path="/story/edit/:storyId" 
+              element={
+                <RequireAuth>
+                  <StoryEditor />
                 </RequireAuth>
               } 
             />

@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,6 +14,8 @@ import { tags } from '@/utils/dummyData';
 import { AIModel, StoryCreationSettings, Story } from '@/types';
 import { aiService } from '@/utils/aiService';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface StoryCreatorProps {
   onStoryCreated?: (story: Story) => void;
@@ -22,6 +23,7 @@ interface StoryCreatorProps {
 
 const StoryCreator = ({ onStoryCreated }: StoryCreatorProps) => {
   const { toast } = useToast();
+  const { user } = useAuth();
   const [activeStep, setActiveStep] = useState(1);
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedCoverImage, setGeneratedCoverImage] = useState<string | null>(null);
@@ -117,20 +119,132 @@ const StoryCreator = ({ onStoryCreated }: StoryCreatorProps) => {
   };
 
   const handleSubmit = async () => {
+    if (!user) {
+      toast({
+        title: "Authentication Required",
+        description: "You must be signed in to create a story",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setIsGenerating(true);
     try {
-      const story = await aiService.generateStory(settings);
+      const { data: storyData, error: storyError } = await supabase
+        .from('stories')
+        .insert({
+          user_id: user.id,
+          title: settings.title,
+          synopsis: settings.synopsis,
+          cover_image: settings.coverImage
+        })
+        .select('id')
+        .single();
+
+      if (storyError) throw storyError;
+
+      for (let i = 0; i < settings.volumeCount; i++) {
+        const { data: volumeData, error: volumeError } = await supabase
+          .from('volumes')
+          .insert({
+            story_id: storyData.id,
+            title: `Volume ${i + 1}`,
+            order_number: i + 1
+          })
+          .select('id')
+          .single();
+
+        if (volumeError) throw volumeError;
+
+        const chapters = [];
+        for (let j = 0; j < settings.chaptersPerVolume; j++) {
+          chapters.push({
+            volume_id: volumeData.id,
+            title: `Chapter ${j + 1}`,
+            content: '',
+            order_number: j + 1
+          });
+        }
+        
+        const { error: chaptersError } = await supabase
+          .from('chapters')
+          .insert(chapters);
+
+        if (chaptersError) throw chaptersError;
+      }
+
+      try {
+        const generatedStory = await aiService.generateStory(settings);
+        
+        console.log("AI story generation successful:", generatedStory);
+      } catch (aiError) {
+        console.error("AI story generation failed, but story structure was created:", aiError);
+      }
+
       toast({
         title: "Story Created!",
-        description: "Your AI-generated story has been created successfully."
+        description: "Your story has been created successfully."
       });
+
+      const { data: fullStory, error: fetchError } = await supabase
+        .from('stories')
+        .select(`
+          id, title, synopsis, cover_image, created_at, updated_at,
+          volumes (
+            id, title, order_number, created_at, updated_at,
+            chapters (
+              id, title, content, order_number, created_at, updated_at
+            )
+          )
+        `)
+        .eq('id', storyData.id)
+        .single();
+
+      if (fetchError) throw fetchError;
+      
+      const story: Story = {
+        id: fullStory.id,
+        title: fullStory.title,
+        synopsis: fullStory.synopsis || '',
+        coverImage: fullStory.cover_image || '',
+        authorId: user.id,
+        authorName: user.email?.split('@')[0] || 'Anonymous',
+        tags: settings.tags.map(tagId => {
+          const tag = tags.find(t => t.id === tagId);
+          return tag || { id: tagId, name: tagId };
+        }),
+        volumes: fullStory.volumes.map((volume: any) => ({
+          id: volume.id,
+          title: volume.title,
+          order: volume.order_number,
+          storyId: fullStory.id,
+          createdAt: volume.created_at,
+          updatedAt: volume.updated_at,
+          chapters: volume.chapters.map((chapter: any) => ({
+            id: chapter.id,
+            title: chapter.title,
+            content: chapter.content || '',
+            order: chapter.order_number,
+            volumeId: volume.id,
+            createdAt: chapter.created_at,
+            updatedAt: chapter.updated_at
+          }))
+        })),
+        createdAt: fullStory.created_at,
+        updatedAt: fullStory.updated_at,
+        views: 0,
+        likes: 0,
+        isPublished: true
+      };
+      
       if (onStoryCreated) {
         onStoryCreated(story);
       }
-    } catch (error) {
+    } catch (error: any) {
+      console.error('Error creating story:', error);
       toast({
-        title: "Generation Failed",
-        description: "There was an error generating your story. Please try again.",
+        title: "Creation Failed",
+        description: error.message || "There was an error creating your story. Please try again.",
         variant: "destructive"
       });
     } finally {
@@ -147,7 +261,6 @@ const StoryCreator = ({ onStoryCreated }: StoryCreatorProps) => {
         </p>
       </div>
 
-      {/* Progress Indicator */}
       <div className="mb-8">
         <div className="flex justify-between mb-2">
           {[1, 2, 3, 4].map((step) => (
@@ -170,7 +283,6 @@ const StoryCreator = ({ onStoryCreated }: StoryCreatorProps) => {
         </div>
       </div>
 
-      {/* Step 1: Basic Info */}
       {activeStep === 1 && (
         <div className="space-y-6 animate-fade-in">
           <div className="space-y-2">
@@ -218,7 +330,6 @@ const StoryCreator = ({ onStoryCreated }: StoryCreatorProps) => {
         </div>
       )}
 
-      {/* Step 2: Cover Image */}
       {activeStep === 2 && (
         <div className="space-y-6 animate-fade-in">
           <Tabs defaultValue="generate">
@@ -306,7 +417,6 @@ const StoryCreator = ({ onStoryCreated }: StoryCreatorProps) => {
         </div>
       )}
 
-      {/* Step 3: Story Structure */}
       {activeStep === 3 && (
         <div className="space-y-6 animate-fade-in">
           <div className="space-y-4">
@@ -384,7 +494,6 @@ const StoryCreator = ({ onStoryCreated }: StoryCreatorProps) => {
         </div>
       )}
 
-      {/* Step 4: AI Model Selection and Confirmation */}
       {activeStep === 4 && (
         <div className="space-y-6 animate-fade-in">
           <div className="space-y-4">
@@ -465,7 +574,7 @@ const StoryCreator = ({ onStoryCreated }: StoryCreatorProps) => {
             <Info className="h-4 w-4" />
             <AlertTitle>Ready to create</AlertTitle>
             <AlertDescription>
-              Your story will be generated based on the settings above. This may take a few minutes depending on the length.
+              Your story will be created based on the settings above.
             </AlertDescription>
           </Alert>
           
@@ -478,7 +587,7 @@ const StoryCreator = ({ onStoryCreated }: StoryCreatorProps) => {
               disabled={isGenerating}
               className="bg-novel-600 hover:bg-novel-700"
             >
-              {isGenerating ? "Generating Story..." : "Generate My Story"}
+              {isGenerating ? "Creating Story..." : "Create My Story"}
             </Button>
           </div>
         </div>

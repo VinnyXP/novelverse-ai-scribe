@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -127,7 +128,7 @@ const Navbar = () => {
                   className="block px-3 py-2 rounded-md text-base font-medium text-foreground hover:bg-secondary"
                   onClick={() => setIsOpen(false)}
                 >
-                  Profile
+                  My Profile
                 </Link>
                 <div className="px-3 py-2">
                   <Button 

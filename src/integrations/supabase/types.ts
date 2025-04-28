@@ -9,7 +9,109 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      chapters: {
+        Row: {
+          content: string | null
+          created_at: string
+          id: string
+          order_number: number
+          title: string
+          updated_at: string
+          volume_id: string
+        }
+        Insert: {
+          content?: string | null
+          created_at?: string
+          id?: string
+          order_number: number
+          title: string
+          updated_at?: string
+          volume_id: string
+        }
+        Update: {
+          content?: string | null
+          created_at?: string
+          id?: string
+          order_number?: number
+          title?: string
+          updated_at?: string
+          volume_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chapters_volume_id_fkey"
+            columns: ["volume_id"]
+            isOneToOne: false
+            referencedRelation: "volumes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      stories: {
+        Row: {
+          cover_image: string | null
+          created_at: string
+          id: string
+          synopsis: string | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          cover_image?: string | null
+          created_at?: string
+          id?: string
+          synopsis?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          cover_image?: string | null
+          created_at?: string
+          id?: string
+          synopsis?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      volumes: {
+        Row: {
+          created_at: string
+          id: string
+          order_number: number
+          story_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          order_number: number
+          story_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          order_number?: number
+          story_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "volumes_story_id_fkey"
+            columns: ["story_id"]
+            isOneToOne: false
+            referencedRelation: "stories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
