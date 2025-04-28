@@ -1,12 +1,30 @@
-
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
-import { Menu, X, BookOpen, PenTool, Search, User } from 'lucide-react';
+import { Menu, X, BookOpen, PenTool, Search, User, LogOut } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [isLoggedIn] = useState(false); // In a real app, this would come from an auth context
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const handleSignOut = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      navigate('/');
+    } catch (error: any) {
+      toast({
+        title: "Error signing out",
+        description: error.message,
+        variant: "destructive"
+      });
+    }
+  };
 
   return (
     <nav className="bg-background border-b border-border sticky top-0 z-50">
@@ -35,14 +53,28 @@ const Navbar = () => {
               />
               <Search className="absolute left-3 top-1.5 text-muted-foreground" size={16} />
             </div>
-            {isLoggedIn ? (
-              <Link to="/profile">
-                <div className="w-8 h-8 bg-novel-600 rounded-full flex items-center justify-center text-white">
-                  <User size={16} />
-                </div>
-              </Link>
+            {user ? (
+              <div className="flex items-center space-x-4">
+                <Link to="/profile">
+                  <div className="w-8 h-8 bg-novel-600 rounded-full flex items-center justify-center text-white">
+                    <User size={16} />
+                  </div>
+                </Link>
+                <Button 
+                  variant="ghost" 
+                  size="icon"
+                  onClick={handleSignOut}
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  <LogOut size={16} />
+                </Button>
+              </div>
             ) : (
-              <Button variant="outline" className="border-novel-600 text-novel-600 hover:bg-novel-600 hover:text-white">
+              <Button 
+                variant="outline" 
+                className="border-novel-600 text-novel-600 hover:bg-novel-600 hover:text-white"
+                onClick={() => navigate('/auth')}
+              >
                 Sign In
               </Button>
             )}
@@ -88,17 +120,38 @@ const Navbar = () => {
                 <Search className="absolute left-3 top-1.5 text-muted-foreground" size={16} />
               </div>
             </div>
-            {isLoggedIn ? (
-              <Link 
-                to="/profile" 
-                className="block px-3 py-2 rounded-md text-base font-medium text-foreground hover:bg-secondary"
-                onClick={() => setIsOpen(false)}
-              >
-                Profile
-              </Link>
+            {user ? (
+              <>
+                <Link 
+                  to="/profile" 
+                  className="block px-3 py-2 rounded-md text-base font-medium text-foreground hover:bg-secondary"
+                  onClick={() => setIsOpen(false)}
+                >
+                  Profile
+                </Link>
+                <div className="px-3 py-2">
+                  <Button 
+                    variant="outline" 
+                    className="w-full"
+                    onClick={() => {
+                      handleSignOut();
+                      setIsOpen(false);
+                    }}
+                  >
+                    Sign Out
+                  </Button>
+                </div>
+              </>
             ) : (
               <div className="px-3 py-2">
-                <Button variant="outline" className="w-full border-novel-600 text-novel-600 hover:bg-novel-600 hover:text-white">
+                <Button 
+                  variant="outline" 
+                  className="w-full border-novel-600 text-novel-600 hover:bg-novel-600 hover:text-white"
+                  onClick={() => {
+                    navigate('/auth');
+                    setIsOpen(false);
+                  }}
+                >
                   Sign In
                 </Button>
               </div>

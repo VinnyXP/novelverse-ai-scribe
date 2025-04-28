@@ -1,40 +1,78 @@
 
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
   const { toast } = useToast();
+  const navigate = useNavigate();
 
-  const handleSignIn = (e: React.FormEvent) => {
+  const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) throw error;
+
       toast({
         title: "Success!",
         description: "You've successfully signed in.",
       });
-    }, 1000);
+      navigate('/create');
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleSignUp = (e: React.FormEvent) => {
+  const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            name,
+          },
+        },
+      });
+
+      if (error) throw error;
+
       toast({
         title: "Account created!",
-        description: "You've successfully created an account.",
+        description: "Please check your email to verify your account.",
       });
-    }, 1000);
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -56,17 +94,25 @@ const Auth = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" placeholder="your@email.com" required />
+                <Label htmlFor="signin-email">Email</Label>
+                <Input 
+                  id="signin-email" 
+                  type="email" 
+                  placeholder="your@email.com" 
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required 
+                />
               </div>
               <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="password">Password</Label>
-                  <a href="#" className="text-sm text-novel-600 hover:underline">
-                    Forgot password?
-                  </a>
-                </div>
-                <Input id="password" type="password" required />
+                <Label htmlFor="signin-password">Password</Label>
+                <Input 
+                  id="signin-password" 
+                  type="password" 
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required 
+                />
               </div>
             </CardContent>
             <CardFooter>
@@ -89,19 +135,34 @@ const Auth = () => {
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="name">Name</Label>
-                <Input id="name" placeholder="Your Name" required />
+                <Input 
+                  id="name" 
+                  placeholder="Your Name" 
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required 
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="signup-email">Email</Label>
-                <Input id="signup-email" type="email" placeholder="your@email.com" required />
+                <Input 
+                  id="signup-email" 
+                  type="email" 
+                  placeholder="your@email.com" 
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required 
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="signup-password">Password</Label>
-                <Input id="signup-password" type="password" required />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="confirm-password">Confirm Password</Label>
-                <Input id="confirm-password" type="password" required />
+                <Input 
+                  id="signup-password" 
+                  type="password" 
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required 
+                />
               </div>
             </CardContent>
             <CardFooter>
