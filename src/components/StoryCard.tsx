@@ -7,26 +7,24 @@ import { Eye, Heart } from 'lucide-react';
 
 interface StoryCardProps {
   story: Story;
-  onClick?: () => void;
 }
 
-const StoryCard = ({ story, onClick }: StoryCardProps) => {
+const StoryCard = ({ story }: StoryCardProps) => {
   return (
-    <Card 
-      className="overflow-hidden flex flex-col h-full transition-all duration-200 hover:-translate-y-1 hover:shadow-md cursor-pointer"
-      onClick={onClick}
-    >
-      <div className="relative aspect-[2/3]">
-        <img
-          src={story.coverImage || '/placeholder.svg'}
-          alt={story.title}
-          className="object-cover w-full h-full"
-        />
-        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
-          <h3 className="text-white font-bold text-lg line-clamp-2">{story.title}</h3>
-          <p className="text-white/80 text-sm">by {story.authorName}</p>
+    <Card className="overflow-hidden flex flex-col h-full transition-all duration-200 hover:-translate-y-1 hover:shadow-md">
+      <Link to={`/read/${story.id}`}>
+        <div className="relative aspect-[2/3]">
+          <img
+            src={story.coverImage}
+            alt={story.title}
+            className="object-cover w-full h-full"
+          />
+          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
+            <h3 className="text-white font-bold text-lg line-clamp-2">{story.title}</h3>
+            <p className="text-white/80 text-sm">by {story.authorName}</p>
+          </div>
         </div>
-      </div>
+      </Link>
       <div className="p-4 flex-grow">
         <p className="text-muted-foreground text-sm line-clamp-3 mb-3">
           {story.synopsis}

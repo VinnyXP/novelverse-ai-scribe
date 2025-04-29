@@ -1,32 +1,26 @@
 
 import { AIModel, StoryCreationSettings, Story, Chapter } from '../types';
 
-// API Base URL for the Python backend
-const API_BASE_URL = 'http://localhost:8081';
+// Replace this with your actual Python backend URL
+const API_BASE_URL = 'https://your-python-backend-url.com';
 
 export const aiService = {
-  generateStory: async (settings: StoryCreationSettings): Promise<any> => {
+  generateStory: async (settings: StoryCreationSettings): Promise<Story> => {
     try {
       const response = await fetch(`${API_BASE_URL}/generate-story`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          ai_model: settings.aiModel,
-          synopsis: settings.synopsis || "",
-          tags: settings.tags || [],
-          volume_count: settings.volumeCount,
-          chapters_per_volume: settings.chaptersPerVolume
-        }),
+        body: JSON.stringify(settings),
       });
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      // Return the raw response from LangGraph
-      return await response.json();
+      const story: Story = await response.json();
+      return story;
     } catch (error) {
       console.error('Error generating story:', error);
       throw error;

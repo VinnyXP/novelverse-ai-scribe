@@ -80,7 +80,7 @@ export const aiMemoryService = {
   /**
    * Helper to get or create a session
    */
-  getOrCreateSession(sessionId: string): MemoryEntry[] {
+  private getOrCreateSession(sessionId: string): MemoryEntry[] {
     if (!this.sessionMemory.has(sessionId)) {
       this.initSession(sessionId);
     }

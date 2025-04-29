@@ -7,104 +7,22 @@ import StoryReader from "@/components/StoryReader";
 import { Button } from "@/components/ui/button";
 import { Story } from "@/types";
 import { ChevronLeft } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import { sampleStories } from "@/utils/dummyData";
 
 const Read = () => {
   const { storyId } = useParams<{ storyId: string }>();
   const [story, setStory] = useState<Story | null>(null);
   const [loading, setLoading] = useState(true);
-  const { toast } = useToast();
   
   useEffect(() => {
-    const fetchStory = async () => {
-      setLoading(true);
-      try {
-        // Try to fetch from local storage first (for AI-generated stories)
-        const savedStoriesJson = localStorage.getItem('ai-generated-stories');
-        if (savedStoriesJson) {
-          const allStories: Story[] = JSON.parse(savedStoriesJson);
-          const foundStory = allStories.find(s => s.id === storyId && s.isPublished);
-          if (foundStory) {
-            setStory(foundStory);
-            setLoading(false);
-            return;
-          }
-        }
-        
-        // Try to fetch from Supabase next - not filtering by is_published since it doesn't exist yet
-        const { data, error } = await supabase
-          .from('stories')
-          .select(`
-            id, title, synopsis, cover_image, user_id, created_at, updated_at,
-            volumes (
-              id, title, order_number, created_at, updated_at,
-              chapters (
-                id, title, content, order_number, created_at, updated_at
-              )
-            )
-          `)
-          .eq('id', storyId)
-          .single();
-
-        if (error) {
-          // If no story found in Supabase, fall back to sample stories
-          const { sampleStories } = await import('@/utils/dummyData');
-          const foundStory = sampleStories.find(s => s.id === storyId);
-          setStory(foundStory || null);
-          return;
-        }
-        
-        // Transform the response to match our Story type
-        const formattedStory: Story = {
-          id: data.id,
-          title: data.title,
-          synopsis: data.synopsis || '',
-          coverImage: data.cover_image || '',
-          authorId: data.user_id,
-          authorName: 'Author', // We could fetch author name from profiles if we had that table
-          tags: [],
-          volumes: data.volumes.map((volume: any) => ({
-            id: volume.id,
-            title: volume.title,
-            order: volume.order_number,
-            storyId: data.id,
-            createdAt: volume.created_at,
-            updatedAt: volume.updated_at,
-            chapters: volume.chapters.map((chapter: any) => ({
-              id: chapter.id,
-              title: chapter.title,
-              content: chapter.content || '',
-              order: chapter.order_number,
-              volumeId: volume.id,
-              createdAt: chapter.created_at,
-              updatedAt: chapter.updated_at
-            }))
-          })),
-          createdAt: data.created_at,
-          updatedAt: data.updated_at,
-          views: 0,
-          likes: 0,
-          isPublished: true // Assume all stories in database are published for now
-        };
-        
-        setStory(formattedStory);
-      } catch (error) {
-        console.error('Error fetching story:', error);
-        toast({
-          title: "Error",
-          description: "Failed to load the story.",
-          variant: "destructive"
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    if (storyId) {
-      fetchStory();
-    }
-  }, [storyId, toast]);
+    // In a real app, this would be an API call
+    setLoading(true);
+    setTimeout(() => {
+      const foundStory = sampleStories.find(s => s.id === storyId) || null;
+      setStory(foundStory);
+      setLoading(false);
+    }, 500);
+  }, [storyId]);
 
   if (loading) {
     return (
@@ -129,7 +47,7 @@ const Read = () => {
           <div className="text-center">
             <h2 className="text-2xl font-bold mb-4">Story Not Found</h2>
             <p className="text-muted-foreground mb-6">
-              We couldn't find the story you're looking for. It may not exist or it hasn't been published.
+              We couldn't find the story you're looking for.
             </p>
             <Button asChild>
               <Link to="/browse">Browse Stories</Link>
