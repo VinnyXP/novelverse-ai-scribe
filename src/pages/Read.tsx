@@ -1,6 +1,6 @@
 
 import { useEffect, useState } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import StoryReader from "@/components/StoryReader";
@@ -10,7 +10,6 @@ import { ChevronLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const Read = () => {
-  const navigate = useNavigate();
   const { storyId } = useParams<{ storyId: string }>();
   const [story, setStory] = useState<Story | null>(null);
   const [loading, setLoading] = useState(true);
@@ -21,9 +20,9 @@ const Read = () => {
       setLoading(true);
       try {
         // Try to fetch from local storage first (for AI-generated stories)
-        const savedStories = localStorage.getItem('ai-generated-stories');
-        if (savedStories) {
-          const allStories: Story[] = JSON.parse(savedStories);
+        const savedStoriesJson = localStorage.getItem('ai-generated-stories');
+        if (savedStoriesJson) {
+          const allStories: Story[] = JSON.parse(savedStoriesJson);
           const foundStory = allStories.find(s => s.id === storyId);
           if (foundStory) {
             setStory(foundStory);

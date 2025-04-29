@@ -34,8 +34,8 @@ export function useAiGenerator() {
           chapters: Array(settings.chaptersPerVolume).fill(null).map((_, chapterIndex) => ({
             id: uuidv4(),
             title: `Chapter ${chapterIndex + 1}`,
-            // Use the generated chapter from the response, or create placeholder content
-            content: response?.chapter || 
+            // Use the generated chapter content from the response
+            content: response.chapter || 
               `Chapter ${chapterIndex + 1} of Volume ${volumeIndex + 1}: Generated content based on synopsis '${settings.synopsis}' with selected tags.`,
             order: chapterIndex + 1,
             volumeId: "temp-volume-id",
