@@ -14,6 +14,7 @@ import NotFound from "./pages/NotFound";
 import Auth from "./components/Auth";
 import Profile from "./pages/Profile";
 import StoryEditor from "./pages/StoryEditor";
+import StoryManagement from "./pages/StoryManagement";
 
 const queryClient = new QueryClient();
 
@@ -40,6 +41,14 @@ const App = () => (
               element={
                 <RequireAuth>
                   <Profile />
+                </RequireAuth>
+              } 
+            />
+            <Route 
+              path="/stories" 
+              element={
+                <RequireAuth>
+                  <StoryManagement />
                 </RequireAuth>
               } 
             />

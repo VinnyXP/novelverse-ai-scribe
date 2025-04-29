@@ -59,9 +59,9 @@ export function useAiChat({ systemPrompt = 'You are a helpful AI assistant.', on
     } catch (error) {
       console.error('Error sending message to AI:', error);
       toast({
-        title: 'Error',
-        description: 'Failed to get a response from the AI.',
-        variant: 'destructive'
+        title: "Error",
+        description: "Failed to get a response from the AI.",
+        variant: "destructive"
       });
       
       if (onError && error instanceof Error) {
