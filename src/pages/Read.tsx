@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Story } from "@/types";
 import { ChevronLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const Read = () => {
   const { storyId } = useParams<{ storyId: string }>();
@@ -23,7 +24,7 @@ const Read = () => {
         const savedStoriesJson = localStorage.getItem('ai-generated-stories');
         if (savedStoriesJson) {
           const allStories: Story[] = JSON.parse(savedStoriesJson);
-          const foundStory = allStories.find(s => s.id === storyId);
+          const foundStory = allStories.find(s => s.id === storyId && s.isPublished);
           if (foundStory) {
             setStory(foundStory);
             setLoading(false);
@@ -31,10 +32,64 @@ const Read = () => {
           }
         }
         
-        // Fall back to sample stories from dummyData
-        const { sampleStories } = await import('@/utils/dummyData');
-        const foundStory = sampleStories.find(s => s.id === storyId);
-        setStory(foundStory || null);
+        // Try to fetch from Supabase next
+        const { data, error } = await supabase
+          .from('stories')
+          .select(`
+            id, title, synopsis, cover_image, user_id, created_at, updated_at, is_published,
+            volumes (
+              id, title, order_number, created_at, updated_at,
+              chapters (
+                id, title, content, order_number, created_at, updated_at
+              )
+            )
+          `)
+          .eq('id', storyId)
+          .eq('is_published', true)
+          .single();
+
+        if (error) {
+          // If no published story found in Supabase, fall back to sample stories
+          const { sampleStories } = await import('@/utils/dummyData');
+          const foundStory = sampleStories.find(s => s.id === storyId);
+          setStory(foundStory || null);
+          return;
+        }
+        
+        // Transform the response to match our Story type
+        const formattedStory: Story = {
+          id: data.id,
+          title: data.title,
+          synopsis: data.synopsis || '',
+          coverImage: data.cover_image || '',
+          authorId: data.user_id,
+          authorName: 'Author', // We could fetch author name from profiles if we had that table
+          tags: [],
+          volumes: data.volumes.map((volume: any) => ({
+            id: volume.id,
+            title: volume.title,
+            order: volume.order_number,
+            storyId: data.id,
+            createdAt: volume.created_at,
+            updatedAt: volume.updated_at,
+            chapters: volume.chapters.map((chapter: any) => ({
+              id: chapter.id,
+              title: chapter.title,
+              content: chapter.content || '',
+              order: chapter.order_number,
+              volumeId: volume.id,
+              createdAt: chapter.created_at,
+              updatedAt: chapter.updated_at
+            }))
+          })),
+          createdAt: data.created_at,
+          updatedAt: data.updated_at,
+          views: 0,
+          likes: 0,
+          isPublished: data.is_published || false
+        };
+        
+        setStory(formattedStory);
       } catch (error) {
         console.error('Error fetching story:', error);
         toast({
@@ -75,7 +130,7 @@ const Read = () => {
           <div className="text-center">
             <h2 className="text-2xl font-bold mb-4">Story Not Found</h2>
             <p className="text-muted-foreground mb-6">
-              We couldn't find the story you're looking for.
+              We couldn't find the story you're looking for. It may not exist or it hasn't been published.
             </p>
             <Button asChild>
               <Link to="/browse">Browse Stories</Link>
