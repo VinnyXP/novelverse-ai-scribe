@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -38,11 +37,9 @@ const Profile = () => {
           cover_image,
           created_at,
           updated_at,
-          user_id,
-          is_published
+          user_id
         `)
-        .eq('user_id', user.id)
-        .order('updated_at', { ascending: false });
+        .eq('user_id', user.id);
       
       if (error) throw error;
       
@@ -54,7 +51,7 @@ const Profile = () => {
       }
       
       // Transform Supabase data to match our Story type
-      const formattedStories: Story[] = data.map(story => ({
+      const formattedStories: Story[] = (data || []).map(story => ({
         id: story.id,
         title: story.title,
         synopsis: story.synopsis || '',
@@ -67,7 +64,7 @@ const Profile = () => {
         updatedAt: story.updated_at,
         views: 0,
         likes: 0,
-        isPublished: story.is_published || false
+        isPublished: true // Assume all database stories are published for now
       }));
       
       // Combine both sources
@@ -138,15 +135,8 @@ const Profile = () => {
           );
           localStorage.setItem('ai-generated-stories', JSON.stringify(updatedStories));
         }
-      } else {
-        // Handle Supabase stories
-        const { error } = await supabase
-          .from('stories')
-          .update({ is_published: updatedPublishState })
-          .eq('id', story.id);
-        
-        if (error) throw error;
       }
+      // Note: We can't update is_published in the database yet because it doesn't exist
       
       // Update local state
       setStories(stories.map(s => 

@@ -37,14 +37,12 @@ const Browse = () => {
       // Fetch from sample stories first
       const { sampleStories } = await import('@/utils/dummyData');
       
-      // Fetch from Supabase
+      // Fetch from Supabase - note: not filtering by is_published since it doesn't exist yet
       const { data: supabaseStories, error } = await supabase
         .from('stories')
         .select(`
-          id, title, synopsis, cover_image, user_id, created_at, updated_at, is_published
-        `)
-        .eq('is_published', true)
-        .order('created_at', { ascending: false });
+          id, title, synopsis, cover_image, user_id, created_at, updated_at
+        `);
       
       if (error) throw error;
       
@@ -57,7 +55,7 @@ const Browse = () => {
       }
       
       // Transform Supabase data to match our Story type
-      const formattedSupabaseStories: Story[] = supabaseStories.map(story => ({
+      const formattedSupabaseStories: Story[] = (supabaseStories || []).map(story => ({
         id: story.id,
         title: story.title,
         synopsis: story.synopsis || '',
@@ -70,7 +68,7 @@ const Browse = () => {
         updatedAt: story.updated_at,
         views: 0,
         likes: 0,
-        isPublished: story.is_published
+        isPublished: true // Assume all stories from database are published for now
       }));
       
       // Combine all sources

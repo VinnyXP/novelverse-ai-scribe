@@ -32,11 +32,11 @@ const Read = () => {
           }
         }
         
-        // Try to fetch from Supabase next
+        // Try to fetch from Supabase next - not filtering by is_published since it doesn't exist yet
         const { data, error } = await supabase
           .from('stories')
           .select(`
-            id, title, synopsis, cover_image, user_id, created_at, updated_at, is_published,
+            id, title, synopsis, cover_image, user_id, created_at, updated_at,
             volumes (
               id, title, order_number, created_at, updated_at,
               chapters (
@@ -45,11 +45,10 @@ const Read = () => {
             )
           `)
           .eq('id', storyId)
-          .eq('is_published', true)
           .single();
 
         if (error) {
-          // If no published story found in Supabase, fall back to sample stories
+          // If no story found in Supabase, fall back to sample stories
           const { sampleStories } = await import('@/utils/dummyData');
           const foundStory = sampleStories.find(s => s.id === storyId);
           setStory(foundStory || null);
@@ -86,7 +85,7 @@ const Read = () => {
           updatedAt: data.updated_at,
           views: 0,
           likes: 0,
-          isPublished: data.is_published || false
+          isPublished: true // Assume all stories in database are published for now
         };
         
         setStory(formattedStory);
