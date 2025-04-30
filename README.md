@@ -1,73 +1,121 @@
-# Welcome to your Lovable project
+# NovelVerse AI Scribe
 
-## Project info
+A web application that uses AI to generate complete novels with consistent story progression, multiple AI model support, and automatic cover image generation.
 
-**URL**: https://lovable.dev/projects/5eaa1ca5-1769-4399-bf26-b86ca4d83f50
+## Features
 
-## How can I edit this code?
+- Multiple AI model support (OpenAI GPT-4, Anthropic Claude, Google Gemini Pro)
+- LangGraph-based story progression system
+- Automatic cover image generation using DALL-E 3
+- Supabase database integration
+- Modern React frontend with TypeScript
 
-There are several ways of editing your application.
+## Prerequisites
 
-**Use Lovable**
+- Python 3.9+
+- Node.js 18+
+- Supabase account
+- API keys for:
+  - OpenAI
+  - Anthropic
+  - Google AI
+  - Supabase
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/5eaa1ca5-1769-4399-bf26-b86ca4d83f50) and start prompting.
+## Backend Setup
 
-Changes made via Lovable will be committed automatically to this repo.
+1. Navigate to the backend directory:
+   ```bash
+   cd backend
+   ```
 
-**Use your preferred IDE**
+2. Create a virtual environment:
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   ```
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+3. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+4. Create a `.env` file with your API keys:
+   ```
+   OPENAI_API_KEY=your_openai_api_key
+   ANTHROPIC_API_KEY=your_anthropic_api_key
+   GOOGLE_API_KEY=your_google_api_key
+   ```
 
-Follow these steps:
+5. Start the backend server:
+   ```bash
+   uvicorn main:app --reload
+   ```
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+## Frontend Setup
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+1. Navigate to the project root directory:
+   ```bash
+   cd ..
+   ```
 
-# Step 3: Install the necessary dependencies.
-npm i
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
+3. Create a `.env` file in the root directory:
+   ```
+   VITE_API_BASE_URL=http://localhost:8000
+   VITE_SUPABASE_URL=your_supabase_url
+   VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+   ```
 
-**Edit a file directly in GitHub**
+4. Start the development server:
+   ```bash
+   npm run dev
+   ```
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## Usage
 
-**Use GitHub Codespaces**
+1. Sign up or log in to the application
+2. Click "Create New Story"
+3. Fill in the story details:
+   - Title
+   - Synopsis
+   - Tags
+   - Number of volumes and chapters
+4. Generate or upload a cover image
+5. Select your preferred AI model
+6. Click "Create My Story"
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+The application will:
+1. Create the story structure in Supabase
+2. Generate the cover image using DALL-E 3
+3. Generate the story content using your chosen AI model
+4. Store all content in the database
+5. Redirect you to the story page
 
-## What technologies are used for this project?
+## Architecture
 
-This project is built with:
+### Backend
+- FastAPI server
+- LangGraph for story progression
+- Multiple AI model integration
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+### Frontend
+- React with TypeScript
+- Shadcn UI components
+- Supabase client integration
+- AI service abstraction
 
-## How can I deploy this project?
+## Contributing
 
-Simply open [Lovable](https://lovable.dev/projects/5eaa1ca5-1769-4399-bf26-b86ca4d83f50) and click on Share -> Publish.
+1. Fork the repository
+2. Create your feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
 
-## Can I connect a custom domain to my Lovable project?
+## License
 
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+This project is licensed under the MIT License - see the LICENSE file for details.

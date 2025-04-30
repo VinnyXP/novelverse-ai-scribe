@@ -1,17 +1,16 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
-import StoryCreator from "@/components/StoryCreator";
+import Navbar from "@/components/layout/Navbar";
+import Footer from "@/components/layout/Footer";
+import StoryCreator from "@/components/story/StoryCreator";
 import { Story } from "@/types";
 
 const Create = () => {
   const navigate = useNavigate();
 
   const handleStoryCreated = (story: Story) => {
-    // In a real app, this would navigate to the edit or view page for the created story
-    navigate(`/read/${story.id}`);
+    // Navigate to profile page after story creation
+    navigate('/profile');
   };
 
   return (

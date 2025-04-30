@@ -1,5 +1,4 @@
-
-import { Story, Tag } from '../types';
+import { Story, Tag, StoryCreationSettings } from '../types';
 
 export const tags: Tag[] = [
   { id: '1', name: 'Fantasy', description: 'Stories set in magical worlds' },

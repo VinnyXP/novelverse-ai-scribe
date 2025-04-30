@@ -1,12 +1,11 @@
-
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import StoryCard from "@/components/StoryCard";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
+import StoryCard from "@/components/story/StoryCard";
+import Navbar from "@/components/layout/Navbar";
+import Footer from "@/components/layout/Footer";
 import { BookOpen, PenTool, Sparkles, Tag } from "lucide-react";
 import { sampleStories, tags } from "@/utils/dummyData";
 

@@ -1,7 +1,6 @@
-
 import { useState, useEffect } from "react";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
+import Navbar from "@/components/layout/Navbar";
+import Footer from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useNavigate } from "react-router-dom";
@@ -9,7 +8,7 @@ import { Plus, Edit, Trash2 } from "lucide-react";
 import { Story } from "@/types";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import StoryCard from "@/components/StoryCard";
+import StoryCard from "@/components/story/StoryCard";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -143,7 +142,9 @@ const Profile = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {stories.map((story) => (
                     <div key={story.id} className="relative group">
-                      <StoryCard story={story} />
+                      <div onClick={() => navigate(`/story/edit/${story.id}`)}>
+                        <StoryCard story={story} />
+                      </div>
                       <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                         <Button
                           variant="secondary"

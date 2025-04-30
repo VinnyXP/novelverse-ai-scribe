@@ -1,11 +1,15 @@
-
-export type AIModel = 'openai' | 'claude' | 'gemini';
+export interface AIModel {
+  name: string;
+  displayName: string;
+  isAvailable: boolean;
+}
 
 export interface User {
   id: string;
   name: string;
   email: string;
   profilePicture?: string;
+  token: string;
 }
 
 export interface Tag {
@@ -28,10 +32,10 @@ export interface Volume {
   id: string;
   title: string;
   order: number;
-  chapters: Chapter[];
   storyId: string;
   createdAt: string;
   updatedAt: string;
+  chapters: Chapter[];
 }
 
 export interface Story {
@@ -41,7 +45,7 @@ export interface Story {
   coverImage: string;
   authorId: string;
   authorName: string;
-  tags: Tag[];
+  tags: { id: string; name: string }[];
   volumes: Volume[];
   createdAt: string;
   updatedAt: string;
@@ -51,11 +55,12 @@ export interface Story {
 }
 
 export interface StoryCreationSettings {
-  title?: string;
-  synopsis?: string;
+  title: string;
+  synopsis: string;
   tags: string[];
   volumeCount: number;
   chaptersPerVolume: number;
+  aiModel: string;
+  isPublished: boolean;
   coverImage?: string;
-  aiModel: AIModel;
 }

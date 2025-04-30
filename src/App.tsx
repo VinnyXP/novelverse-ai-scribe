@@ -1,19 +1,19 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
-import { RequireAuth } from "@/components/RequireAuth";
+import { RequireAuth } from "@/components/auth/RequireAuth";
 import Index from "./pages/Index";
 import Create from "./pages/Create";
 import Browse from "./pages/Browse";
 import Read from "./pages/Read";
 import NotFound from "./pages/NotFound";
-import Auth from "./components/Auth";
+import Auth from "./components/auth/Auth";
 import Profile from "./pages/Profile";
 import StoryEditor from "./pages/StoryEditor";
+import StoryManagement from "./pages/StoryManagement";
 
 const queryClient = new QueryClient();
 
@@ -40,6 +40,14 @@ const App = () => (
               element={
                 <RequireAuth>
                   <Profile />
+                </RequireAuth>
+              } 
+            />
+            <Route 
+              path="/stories" 
+              element={
+                <RequireAuth>
+                  <StoryManagement />
                 </RequireAuth>
               } 
             />

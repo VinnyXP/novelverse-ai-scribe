@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -73,12 +72,16 @@ const StoryReader = ({ story }: StoryReaderProps) => {
     }
   };
 
+  const formatChapterTitle = (chapter: Chapter) => {
+    return `Chapter ${chapter.order}${chapter.title ? `: ${chapter.title}` : ''}`;
+  };
+
   const TableOfContents = () => (
     <div className="space-y-4 p-4">
       <h3 className="font-bold text-lg">Table of Contents</h3>
       {story.volumes.map((volume) => (
         <div key={volume.id} className="space-y-2">
-          <h4 className="font-semibold text-md">{volume.title}</h4>
+          <h4 className="font-semibold text-md">Volume {volume.order}</h4>
           <ul className="space-y-1 ml-4">
             {volume.chapters.map((chapter) => (
               <li 
@@ -91,7 +94,7 @@ const StoryReader = ({ story }: StoryReaderProps) => {
                   handleChapterChange(chapter.id);
                 }}
               >
-                {chapter.title}
+                {formatChapterTitle(chapter)}
               </li>
             ))}
           </ul>
@@ -128,12 +131,14 @@ const StoryReader = ({ story }: StoryReaderProps) => {
         <div className="flex space-x-2">
           <Select value={activeVolume.id} onValueChange={handleVolumeChange}>
             <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Select volume" />
+              <SelectValue placeholder="Select volume">
+                Volume {activeVolume.order}
+              </SelectValue>
             </SelectTrigger>
             <SelectContent>
               {story.volumes.map((volume) => (
                 <SelectItem key={volume.id} value={volume.id}>
-                  {volume.title}
+                  Volume {volume.order}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -150,16 +155,20 @@ const StoryReader = ({ story }: StoryReaderProps) => {
         {/* Chapter Content */}
         <div className="flex-1 p-4">
           <div className="mb-6">
-            <h2 className="text-2xl font-bold mb-2">{activeChapter.title}</h2>
+            <h2 className="text-2xl font-bold mb-2">{formatChapterTitle(activeChapter)}</h2>
             <div className="text-sm text-muted-foreground">
-              Volume: {activeVolume.title} • Chapter {activeChapter.order} of {activeVolume.chapters.length}
+              Volume {activeVolume.order} • Chapter {activeChapter.order} of {activeVolume.chapters.length}
             </div>
           </div>
 
-          <div className="reading-container prose prose-stone dark:prose-invert">
-            {activeChapter.content.split('\n\n').map((paragraph, index) => (
-              <p key={index}>{paragraph}</p>
-            ))}
+          <div className="reading-container prose prose-stone dark:prose-invert max-w-none">
+            {typeof activeChapter.content === 'string' ? (
+              activeChapter.content.split('\n\n').map((paragraph, index) => (
+                <p key={index} className="mb-4">{paragraph}</p>
+              ))
+            ) : (
+              <p>Error loading chapter content. Please try again.</p>
+            )}
           </div>
 
           <div className="flex justify-between mt-8 pb-8">

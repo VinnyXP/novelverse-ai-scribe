@@ -1,19 +1,32 @@
-
 import { Link } from 'react-router-dom';
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Story } from '@/types';
-import { Eye, Heart } from 'lucide-react';
+import { Eye, Heart, Pencil } from 'lucide-react';
+import { useState } from 'react';
+import StoryEditor from './StoryEditor';
 
 interface StoryCardProps {
   story: Story;
+  onStoryUpdated?: (story: Story) => void;
 }
 
-const StoryCard = ({ story }: StoryCardProps) => {
+const StoryCard = ({ story, onStoryUpdated }: StoryCardProps) => {
+  const [isEditing, setIsEditing] = useState(false);
+
+  const handleStoryUpdate = (updatedStory: Story) => {
+    if (onStoryUpdated) {
+      onStoryUpdated(updatedStory);
+    }
+    setIsEditing(false);
+  };
+
   return (
     <Card className="overflow-hidden flex flex-col h-full transition-all duration-200 hover:-translate-y-1 hover:shadow-md">
-      <Link to={`/read/${story.id}`}>
-        <div className="relative aspect-[2/3]">
+      <div className="relative aspect-[2/3]">
+        <Link to={`/read/${story.id}`}>
           <img
             src={story.coverImage}
             alt={story.title}
@@ -23,8 +36,20 @@ const StoryCard = ({ story }: StoryCardProps) => {
             <h3 className="text-white font-bold text-lg line-clamp-2">{story.title}</h3>
             <p className="text-white/80 text-sm">by {story.authorName}</p>
           </div>
+        </Link>
+        <div className="absolute top-2 right-2">
+          <Dialog open={isEditing} onOpenChange={setIsEditing}>
+            <DialogTrigger asChild>
+              <Button size="icon" variant="secondary" className="bg-background/80 backdrop-blur-sm">
+                <Pencil size={16} />
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-3xl">
+              <StoryEditor story={story} onSave={handleStoryUpdate} />
+            </DialogContent>
+          </Dialog>
         </div>
-      </Link>
+      </div>
       <div className="p-4 flex-grow">
         <p className="text-muted-foreground text-sm line-clamp-3 mb-3">
           {story.synopsis}
