@@ -1,9 +1,4 @@
-<<<<<<< HEAD:src/components/story/StoryReader.tsx
-import { useState } from 'react';
-=======
-
 import { useState, useEffect } from 'react';
->>>>>>> refs/remotes/origin/main:src/components/StoryReader.tsx
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Chapter, Story, Volume } from '@/types';
@@ -107,7 +102,6 @@ const StoryReader = ({ story }: StoryReaderProps) => {
   const TableOfContents = () => (
     <div className="space-y-4 p-4">
       <h3 className="font-bold text-lg">Table of Contents</h3>
-<<<<<<< HEAD:src/components/story/StoryReader.tsx
       {story.volumes.map((volume) => (
         <div key={volume.id} className="space-y-2">
           <h4 className="font-semibold text-md">Volume {volume.order}</h4>
@@ -129,38 +123,6 @@ const StoryReader = ({ story }: StoryReaderProps) => {
           </ul>
         </div>
       ))}
-=======
-      {story.volumes.map((volume) => {
-        const publishedChapters = volume.chapters.filter(ch => ch.isPublished);
-        if (publishedChapters.length === 0) return null;
-        
-        return (
-          <div key={volume.id} className="space-y-2">
-            <h4 className="font-semibold text-md">{volume.title}</h4>
-            <ul className="space-y-1 ml-4">
-              {volume.chapters.map((chapter) => {
-                if (!chapter.isPublished) return null;
-                
-                return (
-                  <li 
-                    key={chapter.id}
-                    className={`cursor-pointer hover:text-novel-600 ${
-                      activeChapter?.id === chapter.id ? 'font-semibold text-novel-600' : ''
-                    }`}
-                    onClick={() => {
-                      setActiveVolume(volume);
-                      handleChapterChange(chapter.id);
-                    }}
-                  >
-                    {chapter.title}
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
-        );
-      })}
->>>>>>> refs/remotes/origin/main:src/components/StoryReader.tsx
     </div>
   );
 
@@ -233,11 +195,7 @@ const StoryReader = ({ story }: StoryReaderProps) => {
           <div className="mb-6">
             <h2 className="text-2xl font-bold mb-2">{formatChapterTitle(activeChapter)}</h2>
             <div className="text-sm text-muted-foreground">
-<<<<<<< HEAD:src/components/story/StoryReader.tsx
               Volume {activeVolume.order} • Chapter {activeChapter.order} of {activeVolume.chapters.length}
-=======
-              Volume: {activeVolume.title} • Chapter {activeChapter.order} of {publishedChapters.length}
->>>>>>> refs/remotes/origin/main:src/components/StoryReader.tsx
             </div>
           </div>
 

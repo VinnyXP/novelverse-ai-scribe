@@ -1,15 +1,8 @@
 import { useEffect, useState } from "react";
-<<<<<<< HEAD
 import { useParams, Link, useNavigate } from "react-router-dom";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import StoryReader from "@/components/story/StoryReader";
-=======
-import { useParams, Link } from "react-router-dom";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
-import StoryReader from "@/components/StoryReader";
->>>>>>> refs/remotes/origin/main
 import { Button } from "@/components/ui/button";
 import { Story } from "@/types";
 import { ChevronLeft } from "lucide-react";

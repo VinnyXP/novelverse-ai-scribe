@@ -444,7 +444,7 @@ const StoryCreator = ({ onStoryCreated }: StoryCreatorProps) => {
                     htmlFor="model-openai"
                     className="text-lg font-medium cursor-pointer"
                   >
-                    OpenAI GPT-4
+                    GPT-3.5
                   </Label>
                 </div>
 
@@ -461,7 +461,7 @@ const StoryCreator = ({ onStoryCreated }: StoryCreatorProps) => {
                     htmlFor="model-claude"
                     className="text-lg font-medium cursor-pointer"
                   >
-                    Anthropic Claude
+                    Claude 3.7
                   </Label>
                 </div>
 
@@ -478,7 +478,7 @@ const StoryCreator = ({ onStoryCreated }: StoryCreatorProps) => {
                     htmlFor="model-gemini"
                     className="text-lg font-medium cursor-pointer"
                   >
-                    Google Gemini Pro
+                    Gemini 2.0 Flash
                   </Label>
                 </div>
               </RadioGroup>

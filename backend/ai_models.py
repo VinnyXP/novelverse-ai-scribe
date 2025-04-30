@@ -36,9 +36,9 @@ class AIModelService:
             if os.getenv("OPENAI_API_KEY"):
                 self.models["openai"] = ChatOpenAI(temperature=0.7)
             if os.getenv("ANTHROPIC_API_KEY"):
-                self.models["claude"] = ChatAnthropic(model="claude-3-sonnet-20240229")
+                self.models["claude"] = ChatAnthropic(model="claude-3-7-sonnet-20250219")
             if os.getenv("GOOGLE_API_KEY"):
-                self.models["gemini"] = ChatGoogleGenerativeAI(model="gemini-pro")
+                self.models["gemini"] = ChatGoogleGenerativeAI(model="gemini-2.0-flash")
             logger.info(f"Available models: {list(self.models.keys())}")
         except Exception as e:
             logger.error(f"Error initializing models: {str(e)}")
