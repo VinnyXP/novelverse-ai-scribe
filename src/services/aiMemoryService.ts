@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 
 /**
@@ -80,7 +79,7 @@ export const aiMemoryService = {
   /**
    * Helper to get or create a session
    */
-  private getOrCreateSession(sessionId: string): MemoryEntry[] {
+  getOrCreateSession(sessionId: string): MemoryEntry[] {
     if (!this.sessionMemory.has(sessionId)) {
       this.initSession(sessionId);
     }

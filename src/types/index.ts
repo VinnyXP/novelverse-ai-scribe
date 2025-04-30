@@ -58,4 +58,5 @@ export interface StoryCreationSettings {
   chaptersPerVolume: number;
   coverImage?: string;
   aiModel: AIModel;
+  userId?: string; // Add userId for database operations
 }
