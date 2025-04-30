@@ -3,6 +3,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import Navbar from "@/components/layout/Navbar";
@@ -10,7 +12,7 @@ import Footer from "@/components/layout/Footer";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import ChapterEditor from "@/components/ChapterEditor";
-import { Loader2, Save, ChevronLeft } from "lucide-react";
+import { Loader2, Save, ChevronLeft, Globe, Lock } from "lucide-react";
 import { Story, Volume, Chapter } from "@/types";
 
 const StoryEditor = () => {
@@ -24,6 +26,7 @@ const StoryEditor = () => {
   const [title, setTitle] = useState("");
   const [synopsis, setSynopsis] = useState("");
   const [coverImage, setCoverImage] = useState("");
+  const [isPublished, setIsPublished] = useState(false);
   const [volumes, setVolumes] = useState<Volume[]>([]);
   const [activeTab, setActiveTab] = useState("details");
   const [activeVolumeId, setActiveVolumeId] = useState<string | null>(null);
@@ -51,6 +54,7 @@ const StoryEditor = () => {
       setTitle(storyData.title);
       setSynopsis(storyData.synopsis || "");
       setCoverImage(storyData.cover_image || "");
+      setIsPublished(storyData.is_published || false);
 
       // Fetch volumes
       const { data: volumesData, error: volumesError } = await supabase
@@ -79,7 +83,8 @@ const StoryEditor = () => {
             order: chapter.order_number,
             volumeId: chapter.volume_id,
             createdAt: chapter.created_at,
-            updatedAt: chapter.updated_at
+            updatedAt: chapter.updated_at,
+            isPublished: chapter.is_published || false
           }));
 
           return {
@@ -126,7 +131,8 @@ const StoryEditor = () => {
         .update({
           title,
           synopsis,
-          cover_image: coverImage
+          cover_image: coverImage,
+          is_published: isPublished
         })
         .eq('id', storyId)
         .eq('user_id', user.id);
@@ -182,7 +188,8 @@ const StoryEditor = () => {
         .from('chapters')
         .update({
           title: chapter.title,
-          content: chapter.content
+          content: chapter.content,
+          is_published: chapter.isPublished
         })
         .eq('id', chapter.id);
 
@@ -215,6 +222,39 @@ const StoryEditor = () => {
         variant: "destructive"
       });
       return false;
+    }
+  };
+
+  const toggleChapterPublished = async (chapterId: string, isPublished: boolean) => {
+    try {
+      const { error } = await supabase
+        .from('chapters')
+        .update({ is_published: isPublished })
+        .eq('id', chapterId);
+
+      if (error) throw error;
+
+      // Update local state
+      setVolumes(volumes.map(volume => ({
+        ...volume,
+        chapters: volume.chapters.map(chapter => 
+          chapter.id === chapterId 
+            ? { ...chapter, isPublished } 
+            : chapter
+        )
+      })));
+
+      toast({
+        title: "Success",
+        description: `Chapter ${isPublished ? 'published' : 'unpublished'} successfully`
+      });
+    } catch (error) {
+      console.error("Error toggling chapter published state:", error);
+      toast({
+        title: "Error",
+        description: "Failed to update chapter publishing status",
+        variant: "destructive"
+      });
     }
   };
 
@@ -281,7 +321,23 @@ const StoryEditor = () => {
       
       <main className="flex-grow py-6 bg-background">
         <div className="container mx-auto px-4">
-          <h1 className="text-2xl font-bold mb-6">{title || "Untitled Story"}</h1>
+          <div className="flex items-center justify-between mb-6">
+            <h1 className="text-2xl font-bold">{title || "Untitled Story"}</h1>
+            <div className="flex items-center gap-2">
+              <Switch 
+                id="publish-switch" 
+                checked={isPublished} 
+                onCheckedChange={setIsPublished} 
+              />
+              <Label htmlFor="publish-switch" className="flex items-center gap-1">
+                {isPublished ? (
+                  <><Globe size={16} className="text-green-500" /> Published</>
+                ) : (
+                  <><Lock size={16} /> Private</>
+                )}
+              </Label>
+            </div>
+          </div>
           
           <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-8">
             <TabsList>
@@ -372,16 +428,27 @@ const StoryEditor = () => {
                           {activeVolumeId === volume.id && (
                             <div className="pl-4 border-l space-y-1">
                               {volume.chapters.map((chapter) => (
-                                <div 
-                                  key={chapter.id}
-                                  onClick={() => setActiveChapterId(chapter.id)}
-                                  className={`cursor-pointer py-1 px-2 rounded text-sm ${
-                                    activeChapterId === chapter.id 
-                                      ? "bg-novel-100 text-novel-900 dark:bg-novel-900/20 dark:text-novel-100" 
-                                      : "hover:bg-muted"
-                                  }`}
-                                >
-                                  Chapter {chapter.order}: {chapter.title}
+                                <div key={chapter.id} className="flex items-center justify-between">
+                                  <div 
+                                    onClick={() => setActiveChapterId(chapter.id)}
+                                    className={`cursor-pointer py-1 px-2 rounded text-sm flex items-center gap-1 ${
+                                      activeChapterId === chapter.id 
+                                        ? "bg-novel-100 text-novel-900 dark:bg-novel-900/20 dark:text-novel-100" 
+                                        : "hover:bg-muted"
+                                    }`}
+                                  >
+                                    {chapter.isPublished && <Globe size={12} className="text-green-500" />}
+                                    Chapter {chapter.order}: {chapter.title}
+                                  </div>
+                                  <div className="flex-shrink-0">
+                                    <Switch
+                                      id={`publish-ch-${chapter.id}`}
+                                      checked={chapter.isPublished || false}
+                                      onCheckedChange={(checked) => toggleChapterPublished(chapter.id, checked)}
+                                      className="scale-75"
+                                      onClick={(e) => e.stopPropagation()}
+                                    />
+                                  </div>
                                 </div>
                               ))}
                             </div>

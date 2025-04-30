@@ -26,6 +26,7 @@ export interface Chapter {
   volumeId: string;
   createdAt: string;
   updatedAt: string;
+  isPublished?: boolean;
 }
 
 export interface Volume {

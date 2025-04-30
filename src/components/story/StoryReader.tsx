@@ -1,9 +1,15 @@
+<<<<<<< HEAD:src/components/story/StoryReader.tsx
 import { useState } from 'react';
+=======
+
+import { useState, useEffect } from 'react';
+>>>>>>> refs/remotes/origin/main:src/components/StoryReader.tsx
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Chapter, Story, Volume } from '@/types';
-import { ChevronLeft, ChevronRight, Menu } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Menu, Lock } from 'lucide-react';
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface StoryReaderProps {
   story: Story;
@@ -13,18 +19,27 @@ const StoryReader = ({ story }: StoryReaderProps) => {
   const [activeVolume, setActiveVolume] = useState<Volume | null>(
     story.volumes && story.volumes.length > 0 ? story.volumes[0] : null
   );
-  const [activeChapter, setActiveChapter] = useState<Chapter | null>(
-    activeVolume && activeVolume.chapters && activeVolume.chapters.length > 0 
-      ? activeVolume.chapters[0] 
-      : null
-  );
+  const [activeChapter, setActiveChapter] = useState<Chapter | null>(null);
   const [showTableOfContents, setShowTableOfContents] = useState(false);
+
+  useEffect(() => {
+    if (activeVolume && activeVolume.chapters.length > 0) {
+      // Try to find the first published chapter
+      const firstPublishedChapter = activeVolume.chapters.find(ch => ch.isPublished);
+      if (firstPublishedChapter) {
+        setActiveChapter(firstPublishedChapter);
+      } else {
+        setActiveChapter(activeVolume.chapters[0]);
+      }
+    }
+  }, [activeVolume]);
 
   const handleVolumeChange = (volumeId: string) => {
     const volume = story.volumes.find(v => v.id === volumeId) || null;
     setActiveVolume(volume);
-    if (volume && volume.chapters.length > 0) {
-      setActiveChapter(volume.chapters[0]);
+    if (volume) {
+      const firstPublishedChapter = volume.chapters.find(ch => ch.isPublished);
+      setActiveChapter(firstPublishedChapter || (volume.chapters.length > 0 ? volume.chapters[0] : null));
     } else {
       setActiveChapter(null);
     }
@@ -40,33 +55,46 @@ const StoryReader = ({ story }: StoryReaderProps) => {
   const navigateToChapter = (direction: 'prev' | 'next') => {
     if (!activeVolume || !activeChapter) return;
     
-    const currentIndex = activeVolume.chapters.findIndex(c => c.id === activeChapter.id);
+    const publishedChapters = activeVolume.chapters.filter(c => c.isPublished);
+    const currentIndex = publishedChapters.findIndex(c => c.id === activeChapter.id);
+    
     if (currentIndex === -1) return;
     
     if (direction === 'prev' && currentIndex > 0) {
       // Previous chapter in same volume
-      setActiveChapter(activeVolume.chapters[currentIndex - 1]);
-    } else if (direction === 'next' && currentIndex < activeVolume.chapters.length - 1) {
+      setActiveChapter(publishedChapters[currentIndex - 1]);
+    } else if (direction === 'next' && currentIndex < publishedChapters.length - 1) {
       // Next chapter in same volume
-      setActiveChapter(activeVolume.chapters[currentIndex + 1]);
-    } else if (direction === 'prev' && currentIndex === 0) {
-      // Try to go to last chapter of previous volume
+      setActiveChapter(publishedChapters[currentIndex + 1]);
+    } else {
+      // Try to navigate to another volume
       const volumeIndex = story.volumes.findIndex(v => v.id === activeVolume.id);
-      if (volumeIndex > 0) {
-        const prevVolume = story.volumes[volumeIndex - 1];
-        setActiveVolume(prevVolume);
-        if (prevVolume.chapters.length > 0) {
-          setActiveChapter(prevVolume.chapters[prevVolume.chapters.length - 1]);
+      
+      if (direction === 'prev' && volumeIndex > 0) {
+        // Try to go to last published chapter of previous volume
+        let prevVol = null;
+        for (let i = volumeIndex - 1; i >= 0; i--) {
+          const vol = story.volumes[i];
+          const pubChapters = vol.chapters.filter(c => c.isPublished);
+          if (pubChapters.length > 0) {
+            prevVol = vol;
+            setActiveVolume(prevVol);
+            setActiveChapter(pubChapters[pubChapters.length - 1]);
+            break;
+          }
         }
-      }
-    } else if (direction === 'next' && currentIndex === activeVolume.chapters.length - 1) {
-      // Try to go to first chapter of next volume
-      const volumeIndex = story.volumes.findIndex(v => v.id === activeVolume.id);
-      if (volumeIndex < story.volumes.length - 1) {
-        const nextVolume = story.volumes[volumeIndex + 1];
-        setActiveVolume(nextVolume);
-        if (nextVolume.chapters.length > 0) {
-          setActiveChapter(nextVolume.chapters[0]);
+      } else if (direction === 'next' && volumeIndex < story.volumes.length - 1) {
+        // Try to go to first published chapter of next volume
+        let nextVol = null;
+        for (let i = volumeIndex + 1; i < story.volumes.length; i++) {
+          const vol = story.volumes[i];
+          const pubChapters = vol.chapters.filter(c => c.isPublished);
+          if (pubChapters.length > 0) {
+            nextVol = vol;
+            setActiveVolume(nextVol);
+            setActiveChapter(pubChapters[0]);
+            break;
+          }
         }
       }
     }
@@ -79,6 +107,7 @@ const StoryReader = ({ story }: StoryReaderProps) => {
   const TableOfContents = () => (
     <div className="space-y-4 p-4">
       <h3 className="font-bold text-lg">Table of Contents</h3>
+<<<<<<< HEAD:src/components/story/StoryReader.tsx
       {story.volumes.map((volume) => (
         <div key={volume.id} className="space-y-2">
           <h4 className="font-semibold text-md">Volume {volume.order}</h4>
@@ -100,11 +129,58 @@ const StoryReader = ({ story }: StoryReaderProps) => {
           </ul>
         </div>
       ))}
+=======
+      {story.volumes.map((volume) => {
+        const publishedChapters = volume.chapters.filter(ch => ch.isPublished);
+        if (publishedChapters.length === 0) return null;
+        
+        return (
+          <div key={volume.id} className="space-y-2">
+            <h4 className="font-semibold text-md">{volume.title}</h4>
+            <ul className="space-y-1 ml-4">
+              {volume.chapters.map((chapter) => {
+                if (!chapter.isPublished) return null;
+                
+                return (
+                  <li 
+                    key={chapter.id}
+                    className={`cursor-pointer hover:text-novel-600 ${
+                      activeChapter?.id === chapter.id ? 'font-semibold text-novel-600' : ''
+                    }`}
+                    onClick={() => {
+                      setActiveVolume(volume);
+                      handleChapterChange(chapter.id);
+                    }}
+                  >
+                    {chapter.title}
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        );
+      })}
+>>>>>>> refs/remotes/origin/main:src/components/StoryReader.tsx
     </div>
   );
 
-  if (!activeVolume || !activeChapter) {
+  if (!activeVolume) {
     return <div className="text-center py-10">No content available for this story yet.</div>;
+  }
+
+  // Display message if no chapters are published
+  const publishedChapters = activeVolume.chapters.filter(ch => ch.isPublished);
+  if (publishedChapters.length === 0 || !activeChapter?.isPublished) {
+    return (
+      <div className="max-w-4xl mx-auto p-8">
+        <Alert className="bg-muted/50">
+          <Lock className="h-4 w-4" />
+          <AlertDescription>
+            This story has no published chapters yet. Check back later!
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
   }
 
   return (
@@ -136,7 +212,7 @@ const StoryReader = ({ story }: StoryReaderProps) => {
               </SelectValue>
             </SelectTrigger>
             <SelectContent>
-              {story.volumes.map((volume) => (
+              {story.volumes.filter(v => v.chapters.some(c => c.isPublished)).map((volume) => (
                 <SelectItem key={volume.id} value={volume.id}>
                   Volume {volume.order}
                 </SelectItem>
@@ -157,7 +233,11 @@ const StoryReader = ({ story }: StoryReaderProps) => {
           <div className="mb-6">
             <h2 className="text-2xl font-bold mb-2">{formatChapterTitle(activeChapter)}</h2>
             <div className="text-sm text-muted-foreground">
+<<<<<<< HEAD:src/components/story/StoryReader.tsx
               Volume {activeVolume.order} • Chapter {activeChapter.order} of {activeVolume.chapters.length}
+=======
+              Volume: {activeVolume.title} • Chapter {activeChapter.order} of {publishedChapters.length}
+>>>>>>> refs/remotes/origin/main:src/components/StoryReader.tsx
             </div>
           </div>
 
@@ -176,8 +256,8 @@ const StoryReader = ({ story }: StoryReaderProps) => {
               variant="outline" 
               onClick={() => navigateToChapter('prev')}
               disabled={
-                activeVolume.chapters.indexOf(activeChapter) === 0 && 
-                story.volumes.indexOf(activeVolume) === 0
+                publishedChapters.indexOf(activeChapter) === 0 && 
+                !story.volumes.slice(0, story.volumes.indexOf(activeVolume)).some(v => v.chapters.some(c => c.isPublished))
               }
               className="flex items-center"
             >
@@ -187,8 +267,8 @@ const StoryReader = ({ story }: StoryReaderProps) => {
             <Button 
               onClick={() => navigateToChapter('next')}
               disabled={
-                activeVolume.chapters.indexOf(activeChapter) === activeVolume.chapters.length - 1 && 
-                story.volumes.indexOf(activeVolume) === story.volumes.length - 1
+                publishedChapters.indexOf(activeChapter) === publishedChapters.length - 1 && 
+                !story.volumes.slice(story.volumes.indexOf(activeVolume) + 1).some(v => v.chapters.some(c => c.isPublished))
               }
               className="flex items-center bg-novel-600 hover:bg-novel-700"
             >

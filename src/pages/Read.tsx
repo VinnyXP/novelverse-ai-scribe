@@ -1,56 +1,34 @@
 import { useEffect, useState } from "react";
+<<<<<<< HEAD
 import { useParams, Link, useNavigate } from "react-router-dom";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import StoryReader from "@/components/story/StoryReader";
+=======
+import { useParams, Link } from "react-router-dom";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
+import StoryReader from "@/components/StoryReader";
+>>>>>>> refs/remotes/origin/main
 import { Button } from "@/components/ui/button";
 import { Story } from "@/types";
 import { ChevronLeft } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { sampleStories } from "@/utils/dummyData";
 
 const Read = () => {
-  const navigate = useNavigate();
   const { storyId } = useParams<{ storyId: string }>();
   const [story, setStory] = useState<Story | null>(null);
   const [loading, setLoading] = useState(true);
-  const { toast } = useToast();
   
   useEffect(() => {
-    const fetchStory = async () => {
-      setLoading(true);
-      try {
-        // Try to fetch from local storage first (for AI-generated stories)
-        const savedStories = localStorage.getItem('ai-generated-stories');
-        if (savedStories) {
-          const allStories: Story[] = JSON.parse(savedStories);
-          const foundStory = allStories.find(s => s.id === storyId);
-          if (foundStory) {
-            setStory(foundStory);
-            setLoading(false);
-            return;
-          }
-        }
-        
-        // Fall back to sample stories from dummyData
-        const { sampleStories } = await import('@/utils/dummyData');
-        const foundStory = sampleStories.find(s => s.id === storyId);
-        setStory(foundStory || null);
-      } catch (error) {
-        console.error('Error fetching story:', error);
-        toast({
-          title: "Error",
-          description: "Failed to load the story.",
-          variant: "destructive"
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    if (storyId) {
-      fetchStory();
-    }
-  }, [storyId, toast]);
+    // In a real app, this would be an API call
+    setLoading(true);
+    setTimeout(() => {
+      const foundStory = sampleStories.find(s => s.id === storyId) || null;
+      setStory(foundStory);
+      setLoading(false);
+    }, 500);
+  }, [storyId]);
 
   if (loading) {
     return (
