@@ -38,3 +38,6 @@ enable_confirmations = false
 [functions]
 [functions.story-generator]
 verify_jwt = true
+
+[functions.story-generator-service]
+verify_jwt = true

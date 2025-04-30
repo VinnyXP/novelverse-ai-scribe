@@ -5,7 +5,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.4";
 // Get environment variables
 const supabaseUrl = Deno.env.get("SUPABASE_URL") as string;
 const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") as string;
-const pythonServiceUrl = Deno.env.get("PYTHON_SERVICE_URL") || "http://localhost:8081";
+const serviceApiUrl = Deno.env.get("STORY_SERVICE_API_URL") || "http://localhost:54321/functions/v1/story-generator-service";
 
 // Create Supabase client with the service role key for admin privileges
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
@@ -48,9 +48,9 @@ serve(async (req: Request) => {
       );
     }
 
-    // 2. Call Python service to generate content
-    console.log("Calling Python service for story generation...");
-    const pythonResponse = await fetch(`${pythonServiceUrl}/generate-story`, {
+    // 2. Call our TypeScript service to generate content instead of Python
+    console.log("Calling story generator service for content...");
+    const generationResponse = await fetch(`${serviceApiUrl}/generate-story`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -64,16 +64,16 @@ serve(async (req: Request) => {
       }),
     });
 
-    if (!pythonResponse.ok) {
-      const errorData = await pythonResponse.text();
-      console.error("Python service error:", errorData);
+    if (!generationResponse.ok) {
+      const errorData = await generationResponse.text();
+      console.error("Story generator service error:", errorData);
       return new Response(
         JSON.stringify({ error: "Failed to generate story content from AI service" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    const generationResult = await pythonResponse.json();
+    const generationResult = await generationResponse.json();
     console.log("Story generation successful");
 
     // 3. Update chapters in Supabase with generated content

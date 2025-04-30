@@ -1,4 +1,3 @@
-
 import { AIModel, StoryCreationSettings, Story, Chapter } from '../types';
 import { supabase } from '../integrations/supabase/client';
 
@@ -138,10 +137,10 @@ export const aiService = {
   
   generateCoverImage: async (synopsis: string, tags: string[]): Promise<string> => {
     try {
-      // Call our edge function or Python backend for image generation
-      const { data, error } = await supabase.functions.invoke('story-generator', {
+      // Call our edge function or TypeScript backend for image generation
+      const { data, error } = await supabase.functions.invoke('story-generator-service', {
         body: { 
-          action: 'generate-cover',
+          path: "/generate-cover",
           payload: { synopsis, tags }
         }
       });
