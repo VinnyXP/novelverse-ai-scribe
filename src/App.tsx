@@ -1,5 +1,4 @@
 
-import React from 'react'; // Add explicit React import
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -19,49 +18,47 @@ import StoryEditor from "./pages/StoryEditor";
 const queryClient = new QueryClient();
 
 const App = () => (
-  <React.StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <TooltipProvider>
-          <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/auth" element={<Auth />} />
-              <Route 
-                path="/create" 
-                element={
-                  <RequireAuth>
-                    <Create />
-                  </RequireAuth>
-                } 
-              />
-              <Route 
-                path="/profile" 
-                element={
-                  <RequireAuth>
-                    <Profile />
-                  </RequireAuth>
-                } 
-              />
-              <Route 
-                path="/story/edit/:storyId" 
-                element={
-                  <RequireAuth>
-                    <StoryEditor />
-                  </RequireAuth>
-                } 
-              />
-              <Route path="/browse" element={<Browse />} />
-              <Route path="/read/:storyId" element={<Read />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-            <Toaster />
-            <Sonner />
-          </BrowserRouter>
-        </TooltipProvider>
-      </AuthProvider>
-    </QueryClientProvider>
-  </React.StrictMode>
+  <QueryClientProvider client={queryClient}>
+    <AuthProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/auth" element={<Auth />} />
+            <Route 
+              path="/create" 
+              element={
+                <RequireAuth>
+                  <Create />
+                </RequireAuth>
+              } 
+            />
+            <Route 
+              path="/profile" 
+              element={
+                <RequireAuth>
+                  <Profile />
+                </RequireAuth>
+              } 
+            />
+            <Route 
+              path="/story/edit/:storyId" 
+              element={
+                <RequireAuth>
+                  <StoryEditor />
+                </RequireAuth>
+              } 
+            />
+            <Route path="/browse" element={<Browse />} />
+            <Route path="/read/:storyId" element={<Read />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
+    </AuthProvider>
+  </QueryClientProvider>
 );
 
 export default App;

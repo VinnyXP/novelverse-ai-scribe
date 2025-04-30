@@ -58,18 +58,4 @@ export interface StoryCreationSettings {
   chaptersPerVolume: number;
   coverImage?: string;
   aiModel: AIModel;
-  userId?: string; // Add userId for database operations
-}
-
-export interface StoryGenerationRequest {
-  ai_model: AIModel;
-  synopsis: string;
-  tags: string[];
-  volume_count: number;
-  chapters_per_volume: number;
-}
-
-export interface CoverGenerationRequest {
-  synopsis: string;
-  tags: string[];
 }

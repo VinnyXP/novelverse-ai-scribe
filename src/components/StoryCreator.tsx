@@ -130,23 +130,112 @@ const StoryCreator = ({ onStoryCreated }: StoryCreatorProps) => {
 
     setIsGenerating(true);
     try {
-      // We've modified the aiService instead of directly using supabase here
-      // This will create the story structure and trigger AI content generation
-      const story = await aiService.generateStory({
-        title: settings.title,
-        synopsis: settings.synopsis,
-        tags: settings.tags,
-        volumeCount: settings.volumeCount,
-        chaptersPerVolume: settings.chaptersPerVolume,
-        coverImage: settings.coverImage,
-        aiModel: settings.aiModel,
-        userId: user.id // Pass the user ID for database operations
-      });
+      const { data: storyData, error: storyError } = await supabase
+        .from('stories')
+        .insert({
+          user_id: user.id,
+          title: settings.title,
+          synopsis: settings.synopsis,
+          cover_image: settings.coverImage
+        })
+        .select('id')
+        .single();
+
+      if (storyError) throw storyError;
+
+      for (let i = 0; i < settings.volumeCount; i++) {
+        const { data: volumeData, error: volumeError } = await supabase
+          .from('volumes')
+          .insert({
+            story_id: storyData.id,
+            title: `Volume ${i + 1}`,
+            order_number: i + 1
+          })
+          .select('id')
+          .single();
+
+        if (volumeError) throw volumeError;
+
+        const chapters = [];
+        for (let j = 0; j < settings.chaptersPerVolume; j++) {
+          chapters.push({
+            volume_id: volumeData.id,
+            title: `Chapter ${j + 1}`,
+            content: '',
+            order_number: j + 1
+          });
+        }
+        
+        const { error: chaptersError } = await supabase
+          .from('chapters')
+          .insert(chapters);
+
+        if (chaptersError) throw chaptersError;
+      }
+
+      try {
+        const generatedStory = await aiService.generateStory(settings);
+        
+        console.log("AI story generation successful:", generatedStory);
+      } catch (aiError) {
+        console.error("AI story generation failed, but story structure was created:", aiError);
+      }
 
       toast({
         title: "Story Created!",
-        description: "Your story has been created and content is being generated."
+        description: "Your story has been created successfully."
       });
+
+      const { data: fullStory, error: fetchError } = await supabase
+        .from('stories')
+        .select(`
+          id, title, synopsis, cover_image, created_at, updated_at,
+          volumes (
+            id, title, order_number, created_at, updated_at,
+            chapters (
+              id, title, content, order_number, created_at, updated_at
+            )
+          )
+        `)
+        .eq('id', storyData.id)
+        .single();
+
+      if (fetchError) throw fetchError;
+      
+      const story: Story = {
+        id: fullStory.id,
+        title: fullStory.title,
+        synopsis: fullStory.synopsis || '',
+        coverImage: fullStory.cover_image || '',
+        authorId: user.id,
+        authorName: user.email?.split('@')[0] || 'Anonymous',
+        tags: settings.tags.map(tagId => {
+          const tag = tags.find(t => t.id === tagId);
+          return tag || { id: tagId, name: tagId };
+        }),
+        volumes: fullStory.volumes.map((volume: any) => ({
+          id: volume.id,
+          title: volume.title,
+          order: volume.order_number,
+          storyId: fullStory.id,
+          createdAt: volume.created_at,
+          updatedAt: volume.updated_at,
+          chapters: volume.chapters.map((chapter: any) => ({
+            id: chapter.id,
+            title: chapter.title,
+            content: chapter.content || '',
+            order: chapter.order_number,
+            volumeId: volume.id,
+            createdAt: chapter.created_at,
+            updatedAt: chapter.updated_at
+          }))
+        })),
+        createdAt: fullStory.created_at,
+        updatedAt: fullStory.updated_at,
+        views: 0,
+        likes: 0,
+        isPublished: true
+      };
       
       if (onStoryCreated) {
         onStoryCreated(story);
