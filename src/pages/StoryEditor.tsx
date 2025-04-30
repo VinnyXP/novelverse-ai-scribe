@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import Navbar from "@/components/Navbar";
@@ -442,7 +443,6 @@ const StoryEditor = () => {
                                   </div>
                                   <div className="flex-shrink-0">
                                     <Switch
-                                      size="sm"
                                       id={`publish-ch-${chapter.id}`}
                                       checked={chapter.isPublished || false}
                                       onCheckedChange={(checked) => toggleChapterPublished(chapter.id, checked)}
