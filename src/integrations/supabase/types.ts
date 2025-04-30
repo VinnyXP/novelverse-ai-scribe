@@ -14,6 +14,7 @@ export type Database = {
           content: string | null
           created_at: string
           id: string
+          is_published: boolean
           order_number: number
           title: string
           updated_at: string
@@ -23,6 +24,7 @@ export type Database = {
           content?: string | null
           created_at?: string
           id?: string
+          is_published?: boolean
           order_number: number
           title: string
           updated_at?: string
@@ -32,6 +34,7 @@ export type Database = {
           content?: string | null
           created_at?: string
           id?: string
+          is_published?: boolean
           order_number?: number
           title?: string
           updated_at?: string
@@ -52,6 +55,7 @@ export type Database = {
           cover_image: string | null
           created_at: string
           id: string
+          is_published: boolean
           synopsis: string | null
           title: string
           updated_at: string
@@ -61,6 +65,7 @@ export type Database = {
           cover_image?: string | null
           created_at?: string
           id?: string
+          is_published?: boolean
           synopsis?: string | null
           title: string
           updated_at?: string
@@ -70,6 +75,7 @@ export type Database = {
           cover_image?: string | null
           created_at?: string
           id?: string
+          is_published?: boolean
           synopsis?: string | null
           title?: string
           updated_at?: string

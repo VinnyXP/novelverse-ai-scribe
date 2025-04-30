@@ -1,8 +1,8 @@
 
 import { AIModel, StoryCreationSettings, Story, Chapter } from '../types';
 
-// Replace this with your actual Python backend URL
-const API_BASE_URL = 'https://your-python-backend-url.com';
+// Update this to point to your Python backend
+const API_BASE_URL = 'http://localhost:8081';
 
 export const aiService = {
   generateStory: async (settings: StoryCreationSettings): Promise<Story> => {
@@ -19,8 +19,9 @@ export const aiService = {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const story: Story = await response.json();
-      return story;
+      const data = await response.json();
+      // The Python backend returns a different structure, so we adapt it here
+      return data; // You might need to transform the data to match your Story type
     } catch (error) {
       console.error('Error generating story:', error);
       throw error;
@@ -29,6 +30,11 @@ export const aiService = {
   
   generateCoverImage: async (synopsis: string, tags: string[]): Promise<string> => {
     try {
+      // Since your current Python code doesn't have this endpoint,
+      // we'll return a placeholder until you add it
+      return '/placeholder.svg';
+      
+      /* Uncomment this when you add the endpoint to your Python backend
       const response = await fetch(`${API_BASE_URL}/generate-cover`, {
         method: 'POST',
         headers: {
@@ -43,6 +49,7 @@ export const aiService = {
 
       const data = await response.json();
       return data.imageUrl;
+      */
     } catch (error) {
       console.error('Error generating cover image:', error);
       throw error;

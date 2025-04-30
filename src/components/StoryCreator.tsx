@@ -28,6 +28,7 @@ const StoryCreator = ({ onStoryCreated }: StoryCreatorProps) => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedCoverImage, setGeneratedCoverImage] = useState<string | null>(null);
   const [uploadedCoverImage, setUploadedCoverImage] = useState<string | null>(null);
+  const [isPublished, setIsPublished] = useState(false);
   const [settings, setSettings] = useState<StoryCreationSettings>({
     title: '',
     synopsis: '',
@@ -136,7 +137,8 @@ const StoryCreator = ({ onStoryCreated }: StoryCreatorProps) => {
           user_id: user.id,
           title: settings.title,
           synopsis: settings.synopsis,
-          cover_image: settings.coverImage
+          cover_image: settings.coverImage,
+          is_published: isPublished
         })
         .select('id')
         .single();
@@ -162,7 +164,8 @@ const StoryCreator = ({ onStoryCreated }: StoryCreatorProps) => {
             volume_id: volumeData.id,
             title: `Chapter ${j + 1}`,
             content: '',
-            order_number: j + 1
+            order_number: j + 1,
+            is_published: false // Default to unpublished
           });
         }
         
@@ -189,11 +192,11 @@ const StoryCreator = ({ onStoryCreated }: StoryCreatorProps) => {
       const { data: fullStory, error: fetchError } = await supabase
         .from('stories')
         .select(`
-          id, title, synopsis, cover_image, created_at, updated_at,
+          id, title, synopsis, cover_image, created_at, updated_at, is_published,
           volumes (
             id, title, order_number, created_at, updated_at,
             chapters (
-              id, title, content, order_number, created_at, updated_at
+              id, title, content, order_number, created_at, updated_at, is_published
             )
           )
         `)
@@ -234,7 +237,7 @@ const StoryCreator = ({ onStoryCreated }: StoryCreatorProps) => {
         updatedAt: fullStory.updated_at,
         views: 0,
         likes: 0,
-        isPublished: true
+        isPublished: fullStory.is_published
       };
       
       if (onStoryCreated) {
@@ -516,6 +519,21 @@ const StoryCreator = ({ onStoryCreated }: StoryCreatorProps) => {
                 <Label htmlFor="model-gemini">Google Gemini Pro</Label>
               </div>
             </RadioGroup>
+
+            <div className="pt-4 space-y-2">
+              <div className="flex items-center space-x-2">
+                <Switch 
+                  id="publish-switch"
+                  checked={isPublished}
+                  onCheckedChange={setIsPublished}
+                />
+                <Label htmlFor="publish-switch">Publish story immediately</Label>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                When published, your story will be visible to other users on the platform.
+                You can change this setting later.
+              </p>
+            </div>
           </div>
           
           <Card>
